@@ -1,9 +1,7 @@
 import Foundation
 
 func solution(_ today:String, _ terms:[String], _ privacies:[String]) -> [Int] {
-    // + 달 - 1일 -> 28일되면 달도 -
-    // 그러면 일을 먼저 계산하고 달, 연 순으로 계산해보자.
-    
+
     var days: [String] = [] 
     var privacyTerms: [String] = []
     var termDic: [String: Int] = [:]
