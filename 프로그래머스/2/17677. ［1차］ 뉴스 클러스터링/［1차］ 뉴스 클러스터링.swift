@@ -1,51 +1,37 @@
-func solution(_ str1:String, _ str2:String) -> Int {
-    var setA: Set<Fraction> = []
-    var setB: Set<Fraction> = []
-    let str1 = str1.lowercased()
-    let str2 = str2.lowercased()
-    
-    for i in 0..<str1.count-1 {
-        let frontIndex = str1.index(str1.startIndex, offsetBy: i)
-        let backIndex = str1.index(after: frontIndex)
-        let frontChar = str1[frontIndex]
-        let backChar = str1[backIndex]
-        
-        if frontChar.isLetter && backChar.isLetter {
-            let str = String("\(frontChar)\(backChar)")
-            var num = 1
-            var frac = Fraction(str: str, num: num)
-            
-            while setA.contains(frac) { frac.num += 1 }
-            
-            setA.insert(frac)
-        } else { continue }
-    }
-    
-    for i in 0..<str2.count-1 {
-        let frontIndex = str2.index(str1.startIndex, offsetBy: i)
-        let backIndex = str2.index(after: frontIndex)
-        let frontChar = str2[frontIndex]
-        let backChar = str2[backIndex]
-        
-        if frontChar.isLetter && backChar.isLetter {
-            let str = String("\(frontChar)\(backChar)")
-            var num = 1
-            var frac = Fraction(str: str, num: num)
-            
-            while setB.contains(frac) { frac.num += 1 }
-            
-            setB.insert(frac)
-        } else { continue }
-    }
-    
-    let intersection = setA.intersection(setB)
-    let union = setA.union(setB)
-    
-    if intersection.isEmpty && union.isEmpty { return 65536 }
-    return Int((Double(intersection.count) / Double(union.count)) * 65536)
-}
+import Foundation
 
-struct Fraction: Hashable {
-    let str: String
-    var num: Int
+func solution(_ str1: String, _ str2: String) -> Int {
+    func makeMultiset(_ s: String) -> [String: Int] {
+        var dict = [String: Int]()
+        let chars = Array(s.lowercased())
+        for i in 0..<chars.count - 1 {
+            let pair = String([chars[i], chars[i+1]])
+            if pair.allSatisfy({ $0.isLetter }) {
+                dict[pair, default: 0] += 1
+            }
+        }
+        return dict
+    }
+
+    let dict1 = makeMultiset(str1)
+    let dict2 = makeMultiset(str2)
+
+    let allKeys = Set(dict1.keys).union(dict2.keys)
+
+    var intersectionCount = 0
+    var unionCount = 0
+
+    for key in allKeys {
+        let count1 = dict1[key] ?? 0
+        let count2 = dict2[key] ?? 0
+        intersectionCount += min(count1, count2)
+        unionCount += max(count1, count2)
+    }
+
+    if unionCount == 0 {
+        return 65536
+    }
+
+    let similarity = Double(intersectionCount) / Double(unionCount)
+    return Int(similarity * 65536)
 }
