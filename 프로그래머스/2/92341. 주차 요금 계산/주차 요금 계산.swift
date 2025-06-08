@@ -3,8 +3,6 @@ import Foundation
 func solution(_ fees:[Int], _ records:[String]) -> [Int] {
     var dic: [String: String] = [:] 
     var mins: [String: Int] = [:]
-    var orders: [String: Int] = [:]
-    var order = 0
     var results: [Int] = []
 
     for record in records {
@@ -12,37 +10,21 @@ func solution(_ fees:[Int], _ records:[String]) -> [Int] {
         if record[2] == "IN" { 
             dic[record[1]] = record[0]
             continue
-        } else {
-            order += 1
-            let min = getMin(from: dic[record[1]]!, to: record[0])
-            dic[record[1]] = nil
-            if mins[record[1]] == nil { 
-                mins[record[1]] = min
-                orders[record[1]] = order
-            } else { 
-                mins[record[1]]! += min
-                orders[record[1]]! += order
-            }
-            
         }
+        
+        let min = getMin(from: dic[record[1]]!, to: record[0])
+        dic[record[1]] = nil
+        mins[record[1], default: 0] += min
     }
     
     for key in dic.keys {
-        order += 1
         let min = getMin(from: dic[key]!)
-        if mins[key] == nil { 
-            mins[key] = min
-            orders[key] = order
-        } else { 
-            mins[key]! += min
-            orders[key]! += order
-        }
+        mins[key, default: 0] += min
     }
     
-    for (k, v) in orders.sorted(by: { Int($0.key)! < Int($1.key)! }) {
+    for k in mins.keys.sorted() {
         results.append(getFee(from: mins[k]!, fees))
     }
-    
     
     return results
 }
