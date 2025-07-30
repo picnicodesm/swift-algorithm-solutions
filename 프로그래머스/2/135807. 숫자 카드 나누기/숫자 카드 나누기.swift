@@ -1,18 +1,18 @@
 import Foundation
 
 func solution(_ arrayA:[Int], _ arrayB:[Int]) -> Int {
-    var maxDividerA = arrayA.first!
-    var maxDividerB = arrayB.first!
-    var dividersA: [Int] = []
-    var dividersB: [Int] = []
+    var maxDivisorA = arrayA.first!
+    var maxDivisorB = arrayB.first!
+    var divisorsA: [Int] = []
+    var divisorsB: [Int] = []
     var result = 0
     
     for i in 1..<arrayA.count {
-        maxDividerA = gcd(maxDividerA, arrayA[i])
-        maxDividerB = gcd(maxDividerB, arrayB[i])
+        maxDivisorA = gcd(maxDivisorA, arrayA[i])
+        maxDivisorB = gcd(maxDivisorB, arrayB[i])
     }
     
-    for i in stride(from: maxDividerA, to: 0, by: -1) {
+    for i in stride(from: maxDivisorA, to: 0, by: -1) {
         var flag = true 
         
         for n in arrayA {
@@ -22,10 +22,10 @@ func solution(_ arrayA:[Int], _ arrayB:[Int]) -> Int {
             }
         }
         
-        if flag { dividersA.append(i) }
+        if flag { divisorsA.append(i) }
     }
     
-    for i in stride(from: maxDividerB, to: 0, by: -1) {
+    for i in stride(from: maxDivisorB, to: 0, by: -1) {
         var flag = true 
         
         for n in arrayB {
@@ -35,37 +35,37 @@ func solution(_ arrayA:[Int], _ arrayB:[Int]) -> Int {
             }
         }
         
-        if flag { dividersB.append(i) }
+        if flag { divisorsB.append(i) }
     }
     
-    for divider in dividersA {
+    for divisor in divisorsA {
         var flag = true 
         
         for n in arrayB {
-            if n % divider == 0 {
+            if n % divisor == 0 {
                 flag = false
                 break
             }
         }
         
         if flag { 
-            result = max(result, divider)
+            result = max(result, divisor)
             break
         }
     }
     
-    for divider in dividersB {
+    for divisor in divisorsB {
         var flag = true 
         
         for n in arrayA {
-            if n % divider == 0 {
+            if n % divisor == 0 {
                 flag = false
                 break
             }
         }
         
         if flag { 
-            result = max(result, divider)
+            result = max(result, divisor)
             break
         }
     }
