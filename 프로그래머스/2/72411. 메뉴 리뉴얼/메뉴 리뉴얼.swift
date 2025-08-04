@@ -17,9 +17,7 @@ func solution(_ orders:[String], _ course:[Int]) -> [String] {
             combinations[combi, default: 0] += 1
         }
        
-        if length == order.count { return }
-    
-        for i in 1...order.count-length {
+        for i in 1...order.count-length+1 {
             dfs(combi: combi, combiLength: length, order: order, index: index + i)
         }
     }
@@ -33,20 +31,11 @@ func solution(_ orders:[String], _ course:[Int]) -> [String] {
 
     for courseCount in course {
         let filtered = combinations.filter { $0.key.count == courseCount && $0.value > 1 }
-        var selected: [String] = []
-        var maxCount = 0
-        
-        for (combi, count) in filtered {
-            if count > maxCount {
-                selected = []
-                selected.append(combi)
-                maxCount = count
-            } else if count == maxCount {
-                selected.append(combi)
-            }
+        guard let maxCount = filtered.values.max() else {
+            continue
         }
         
-        result.append(contentsOf: selected)
+        result.append(contentsOf: filtered.filter { $0.value == maxCount }.map { $0.key })
     }
     
     return result.sorted()
