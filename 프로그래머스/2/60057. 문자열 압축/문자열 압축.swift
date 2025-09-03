@@ -15,12 +15,12 @@ func compress(_ s : String, by length: Int) -> Int {
     let charArrOfStr = Array(s)
     var compressed = ""
     var repeatNum = 1
-    var beforeWindow = String(Array(charArrOfStr[0..<length]))
+    var beforeWindow = ""
     var currentWindow = ""
     
-    for i in stride(from: length, to: charArrOfStr.count, by: length) {
+    for i in stride(from: 0, to: charArrOfStr.count, by: length) {
         if i + length > charArrOfStr.count {
-            compressed += ((repeatNum == 1 ? "" : String(repeatNum)) + String(beforeWindow))
+            compressed += ((repeatNum == 1 ? "" : String(repeatNum)) + beforeWindow)
             compressed += String(Array(charArrOfStr[i...]))
 
             return compressed.count
@@ -30,14 +30,14 @@ func compress(_ s : String, by length: Int) -> Int {
             if beforeWindow == currentWindow {
                 repeatNum += 1
             } else {
-                compressed += ((repeatNum == 1 ? "" : String(repeatNum)) + String(beforeWindow))
+                compressed += ((repeatNum == 1 ? "" : String(repeatNum)) + beforeWindow)
                 repeatNum = 1
                 beforeWindow = currentWindow
             } 
         }
     }
     
-    compressed += ((repeatNum == 1 ? "" : String(repeatNum)) + String(beforeWindow))
+    compressed += ((repeatNum == 1 ? "" : String(repeatNum)) + beforeWindow)
     
     return compressed.count   
 }
