@@ -1,42 +1,72 @@
 import Foundation
 
-func solution(_ n: Int, _ q: [[Int]], _ ans: [Int]) -> Int {
+// q에 있는 숫자들을 가지고 조합을 만든 뒤 테스트를 하는게 좋을수도?
+
+func solution(_ n:Int, _ q:[[Int]], _ ans:[Int]) -> Int {
+    let combinations = getCombinations(n: n)
     var result = 0
     
-    // 조합 생성기
-    func combinations(_ arr: [Int], _ k: Int) -> [[Int]] {
-        if k == 0 { return [[]] }
-        if arr.count < k { return [] }
-        if arr.count == k { return [arr] }
-        
-        var res = [[Int]]()
-        for i in 0..<(arr.count) {
-            let elem = arr[i]
-            let rest = Array(arr[(i+1)...])
-            for comb in combinations(rest, k-1) {
-                res.append([elem] + comb)
-            }
-        }
-        return res
-    }
+    print(combinations.count)
     
-    // 전체 조합 생성 (1~n 중 5개)
-    let allComb = combinations(Array(1...n), 5)
-    
-    // 각 조합을 검증
-    for comb in allComb {
-        var valid = true
-        for (i, query) in q.enumerated() {
-            let count = query.filter { comb.contains($0) }.count
-            if count != ans[i] {
-                valid = false
+    for combination in combinations {
+        var possible = true
+ 
+        for index in 0..<q.count {
+            let query = q[index] 
+            var same = Set(query).intersection(Set(combination)).count
+            
+            if same != ans[index] {
+                possible = false
                 break
             }
         }
-        if valid {
+    
+        if possible { 
             result += 1
         }
     }
     
+    return result
+}
+
+func getCombinations(n: Int, k: Int = 5) -> [[Int]] {
+    var result: [[Int]] = []
+    var current = [1, 2, 3, 4, 5]
+    var stack: [[Int]] = [current]
+    var visited: Set<[Int]> = []
+    
+    while !stack.isEmpty {
+        let current = stack.removeLast()
+        result.append(current)
+        visited.insert(current)
+        var temp = current
+        
+        if current[0] == n-4 {
+            continue
+        }
+        
+        for place in 0..<5 {
+            if place == 4 {
+                var num = current[place]
+                while num < n {
+                    num += 1
+                    temp[place] = num
+                    if !visited.contains(temp) {
+                        stack.append(temp)    
+                    }
+                }
+            } else {
+                var num = current[place]
+                while num < current[place+1] - 1 {
+                    num += 1
+                    temp[place] = num
+                    if !visited.contains(temp) {
+                        stack.append(temp)    
+                    }
+                }
+            }
+        }   
+    }
+
     return result
 }
