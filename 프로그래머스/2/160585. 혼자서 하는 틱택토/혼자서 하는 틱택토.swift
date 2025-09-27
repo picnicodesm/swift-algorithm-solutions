@@ -1,96 +1,118 @@
 import Foundation
 
+typealias Pos = (row: Int, col: Int)
+
 func solution(_ board:[String]) -> Int {
-     let board = board.map { $0.map { String($0) }}
-    // 차이는 1 이하여야 한다.
-    // 불가 조건 1: X가 O보다 많다.
-    let numberOfO = number(of: "O", in: board)
-    let numberOfX = number(of: "X", in: board)
+
+    let (countO, countX, newBoard) = convert(board)
     
+    if abs(countO - countX) > 1 { return 0 }
     
-    if numberOfO < numberOfX || (abs(numberOfO - numberOfX) > 1) { 
-        return 0 
-    } else if numberOfO == numberOfX {
-        // 불가 조건 2: 갯수가 같은 경우 O가 이미 끝냈을 수도 있다.
-        if numberOfO >= 3 {
-            if isGameEnd(by: "O", in: board)  {
-                return 0 
-            }
-        } 
-    } else { // O가 X보다 1개 많은 경우
-        // 불가 조건 3: X가 게임을 끝냈는데도 진행했을 수 있다.
-        if numberOfX >= 3 {
-            if isGameEnd(by: "X", in: board) {
-                return 0
-            }
-        }
-        
+    if countO < countX {
+        return 0
+    } else if countO == countX {
+        if isWin("O", board: newBoard) { return 0 }
+    } else {
+        if isWin("X", board: newBoard) { return 0 }
     }
     
     return 1
 }
 
-func number(of str: String, in board: [[String]]) -> Int {
-    var numOfStr = 0
-    
-    for row in 0..<board.count {
-        for col in 0..<board[0].count {
-            if board[row][col] == str { 
-                numOfStr += 1
-            }
-        }
-    }
-    
-    return numOfStr
-}
+func isWin(_ char: String, board: [[String]]) -> Bool {
+    // --------------------------- 내부 함수 -------------------------------
+    // 양옆
+    func successOfSide(_ pos: Pos) -> Bool {
+        var leftCol = pos.col
+        var rightCol = pos.col
 
-func isGameEnd(by str: String, in board: [[String]]) -> Bool {
-    
-    func test(_ pos: [Int], directions: [Direction]) -> Bool {
-        let str = board[pos[0]][pos[1]]
-        
-        for dir in directions {
-            var length = 1 
-            
-            let searchPositions = getPos(from: pos, direction: dir)
-            
-            for searchPosition in searchPositions {
-                if board[searchPosition[0]][searchPosition[1]] == str {
-                    length += 1
-                }
-            }
-                            
-            if length == 3 { return true }
+        while leftCol >= 0 {
+            if board[pos.row][leftCol] != char { return false }
+            leftCol -= 1
         }
         
-        return false
+        while rightCol < board[0].count {
+            if board[pos.row][rightCol] != char { return false }
+            rightCol += 1
+        }
+        
+        return true
     }
     
+    // 위아래
+    func successOfUpDown(_ pos: Pos) -> Bool {
+        var upRow = pos.row
+        var downRow = pos.row
+
+        while upRow >= 0 {
+            if board[upRow][pos.col] != char { return false }
+                upRow -= 1
+        }
+            
+        while downRow < board.count {
+            if board[downRow][pos.col] != char { return false }
+                downRow += 1
+        }
+        
+        return true
+    }
+    
+    // 대각선
+    func successOfDiagonal(_ pos: Pos) -> Bool {
+        var leftUpPos: Pos = (pos.row - 1, pos.col - 1)
+        var leftDownPos: Pos = (pos.row + 1, pos.col - 1)
+        var rightUpPos: Pos = (pos.row - 1, pos.col + 1)
+        var rightDownPos: Pos = (pos.row + 1, pos.col + 1)
+        
+        var leftUpCondition: Bool { (leftUpPos.row >= 0 && leftUpPos.col >= 0) }
+        var leftDownCondition: Bool { (leftDownPos.row < board.count && leftDownPos.col >= 0) }
+        var rightUpCondition: Bool { (rightUpPos.row >= 0 && rightUpPos.col < board[0].count) }
+        var rightDownCondition: Bool { (rightDownPos.row < board.count && rightDownPos.col < board[0].count) }
+        var count = 0
+        
+        // \ 방향
+        while leftUpCondition {
+            if board[leftUpPos.row][leftUpPos.col] != char {
+                return false
+            } else if board[leftUpPos.row][leftUpPos.col] == char { count += 1 }
+            leftUpPos = (leftUpPos.row - 1, leftUpPos.col - 1)
+        }
+            
+        while rightDownCondition {
+            if board[rightDownPos.row][rightDownPos.col] != char {
+                return false
+            } else if board[rightDownPos.row][rightDownPos.col] == char { count += 1 }
+            rightDownPos = (rightDownPos.row + 1, rightDownPos.col + 1)
+        }   
+        
+        if count == (board.count - 1) { return true }
+        
+        // / 방향
+        count = 0
+        while leftDownCondition {
+            if board[leftDownPos.row][leftDownPos.col] != char {
+                return false
+            } else if board[leftDownPos.row][leftDownPos.col] == char { count += 1 }
+            leftDownPos = (leftDownPos.row + 1, leftDownPos.col - 1)
+        }
+            
+        while rightUpCondition {
+            if board[rightUpPos.row][rightUpPos.col] != char {
+                return false
+            } else if board[rightUpPos.row][rightUpPos.col] == char { count += 1 }
+            rightUpPos = (rightUpPos.row - 1, rightUpPos.col + 1)
+        }   
+        
+        return count == (board.count - 1)
+    }
+    
+    // --------------------------- 사용 -------------------------------
     for row in 0..<board.count {
         for col in 0..<board[0].count {
-            if board[row][col] == str {
-                let pos = [row, col]
-                switch (row, col) {
-                    case (0, 0):
-                    if test(pos, directions: [.right, .down, .rightDown]) { return true }
-                    case (0, 1):
-                    if  test(pos, directions: [.leftRight, .down]) { return true }
-                    case (0, 2):
-                    if test(pos, directions: [.left, .down, .leftDown]) { return true }
-                    case (1, 0):
-                    if test(pos, directions: [.right, .upDown]) { return true }
-                    case (1, 1):
-                    if test(pos, directions: [.upDown, .leftRight, .leftUpRightDown, .leftDownRightUp]) { return true }
-                    case (1, 2):
-                    if test(pos, directions: [.left, .upDown]) { return true }
-                    case (2, 0):
-                    if test(pos, directions: [.up, .right, .rightUp]) { return true }
-                    case (2, 1):
-                    if test(pos, directions: [.up, .leftRight]) { return true }
-                    case (2, 2):
-                    if test(pos, directions: [.left, .up, .leftUp]) { return true }
-                    default: 
-                    return false
+            if board[row][col] == char {
+                let pos = (row, col)
+                if successOfSide(pos) || successOfUpDown(pos) || successOfDiagonal(pos) {
+                    return true
                 }
             }
         }
@@ -99,26 +121,21 @@ func isGameEnd(by str: String, in board: [[String]]) -> Bool {
     return false
 }
 
-enum Direction {
-    case up, down, left, right, upDown, leftRight, leftUp, leftDown, rightUp, rightDown, leftUpRightDown, leftDownRightUp
-}
-
-func getPos(from pos: [Int], direction: Direction) -> [[Int]] {
-    let row = pos[0]
-    let col = pos[1]
-    
-    switch direction {
-        case .up: return [[row - 1, col], [row - 2, col]]
-        case .down: return [[row + 1, col], [row + 2, col]]
-        case .left: return [[row, col - 1], [row, col - 2]]
-        case .right: return [[row, col + 1], [row, col + 2]]
-        case .upDown: return [[row - 1, col], [row + 1, col]]
-        case .leftRight: return [[row, col - 1], [row, col + 1]]
-        case .leftUp: return [[row - 1, col - 1], [row - 2, col - 2]]
-        case .leftDown: return [[row + 1, col - 1], [row + 2, col - 2]]
-        case .rightUp: return [[row - 1, col + 1], [row - 2, col + 2]]
-        case .rightDown: return [[row + 1, col + 1], [row + 2, col + 2]]
-        case .leftUpRightDown: return [[row - 1, col - 1], [row + 1, col + 1]]
-        case .leftDownRightUp: return [[row + 1, col - 1], [row - 1, col + 1]]
+func convert(_ board: [String]) -> (Int, Int, [[String]]) {
+    var countO = 0
+    var countX = 0
+    var newBoard: [[String]] = []
+        
+    board.forEach {
+        var newLine: [String] = []
+        $0.forEach {
+            let char = String($0)
+            if char == "O" { countO += 1 }
+            else if char == "X" { countX += 1 }
+            newLine.append(char)
+        }
+        newBoard.append(newLine)
     }
+    
+    return (countO, countX, newBoard)
 }
