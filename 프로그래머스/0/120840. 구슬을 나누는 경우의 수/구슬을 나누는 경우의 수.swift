@@ -8,12 +8,12 @@ func solution(_ balls:Int, _ share:Int) -> Int {
         return 1
     }
     
-    var result = 1.0
+    var result = 1
 
     for i in 0..<k {
-        result *= Double(balls - i)
-        result /= Double(i + 1)
+        result *= (balls - i)
+        result /= (i + 1)
     }
 
-    return Int(round(result))
+    return result
 }
