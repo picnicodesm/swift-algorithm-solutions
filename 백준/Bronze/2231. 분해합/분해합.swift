@@ -1,16 +1,23 @@
-let input = Int(readLine()!)!
-var n = 1 // 생성자
-while n < input {
-    var temp = n
-    var sum = 0
-    while temp != 0 {
-        sum += temp % 10
-        temp /= 10
-    }
-    let newSum = n + sum // 분해합
-    if input == newSum {
+import Foundation
+
+func getDecompositionSum(_ n: Int) -> Int {
+    let nums = String(n).map { Int(String($0))! }
+    let sum = n + nums.reduce(0,+)
+    
+    return sum
+}
+
+let n = readLine()!
+let num = Int(n)!
+let startNum = max(0,Int(n)! - (9 * n.count))
+var output = 0
+
+for i in startNum...num {
+    let sum = getDecompositionSum(i)
+    if sum == num {
+        output = i
         break
     }
-    n += 1
 }
-print(n == input ? 0 : n)
+
+print(output)
